@@ -1,0 +1,172 @@
+ ---------------------------------
+| Ejemplo 1: Lógica combinacional |
+ ---------------------------------
+
+######
+# E1 #
+######
+
+# P1.1.1
+#########
+
+Sí, el multiplexor se comporta como se esperaba que lo hiciese.
+
+# P1.1.2
+#########
+
+La principal diferencia es la periodicidad de la simulación.
+
+######
+# E2 #
+######
+
+# P1.2.1
+#########
+
+Line 6: Cannot find <logic_components> in library <teach_logic_lib>. Please ensure that the library was compiled, and that a library and a use clause are present in the VHDL file.
+El problema es que no encuentra los componentes en su directorio de trabajo.
+
+# P1.2.2
+#########
+
+Sí, se obtiene lo mismo que en P1.1.2.
+
+######
+# E3 #
+######
+
+# P1.3.1
+#########
+
+En lugar de usar bits estamos usando buses de 8 bits
+
+# P1.3.2
+#########
+
+LIBRARY IEEE;
+USE IEEE.STD_LOGIC_1164.ALL;
+
+ENTITY mux2a1_de8 IS       
+    PORT(a: in std_logic_vector (7 downto 0);
+         b: in std_logic_vector (7 downto 0);
+         sel: in std_logic;
+         z: out std_logic_vector (7 downto 0));
+END;
+
+architecture behavior of mux2a1_de8 is
+
+    component mi_mux
+        Port (a, b: in std_logic;
+              sel: in std_logic;
+              z: out std_logic);
+    end component;
+
+begin
+
+UUT0 : mi_mux Port Map (a(0), b(0), sel, z(0));
+UUT1 : mi_mux Port Map (a(1), b(1), sel, z(1));
+UUT2 : mi_mux Port Map (a(2), b(2), sel, z(2));
+UUT3 : mi_mux Port Map (a(3), b(3), sel, z(3));
+UUT4 : mi_mux Port Map (a(4), b(4), sel, z(4));
+UUT5 : mi_mux Port Map (a(5), b(5), sel, z(5));
+UUT6 : mi_mux Port Map (a(6), b(6), sel, z(6));
+UUT7 : mi_mux Port Map (a(7), b(7), sel, z(7));
+
+end behavior;
+
+# P1.3.3
+#########
+
+mux4a1_8bits.vhd:
+----------------
+
+entity mux4a1_8bits is
+    Port ( a : in  STD_LOGIC_VECTOR (7 downto 0);
+           b : in  STD_LOGIC_VECTOR (7 downto 0);
+           c : in  STD_LOGIC_VECTOR (7 downto 0);
+           d : in  STD_LOGIC_VECTOR (7 downto 0);
+           sel : in  STD_LOGIC_VECTOR (1 downto 0);
+           z : out  STD_LOGIC_VECTOR (7 downto 0));
+end mux4a1_8bits;
+
+architecture Behavioral of mux4a1_8bits is
+
+signal z_a, z_b : std_logic_vector (7 downto 0);
+signal sel_a, sel_b: std_logic;
+
+	component mux2a1_de8
+		Port (a, b: in std_logic_vector (7 downto 0);
+             sel: in std_logic;
+               z: out std_logic_vector (7 downto 0));
+   end component;
+
+begin
+
+UUT0 : mux2a1_de8 Port Map (a, b, sel_a, z_a);
+UUT1 : mux2a1_de8 Port Map (c, d, sel_b, z_b);
+
+	process (a, b, c, d, sel)
+		begin
+			if (sel = "00" or sel = "01") then
+				z 		<= z_a;
+				sel_a <= sel(0);
+			else
+				z 		<= z_b;
+				sel_b <= sel(0);
+			end if;
+	end process;
+
+end Behavioral;
+
+tb_mux4a1_8bits.vhd:
+-------------------
+
+ENTITY tb_mux4a1_8bits IS
+END tb_mux4a1_8bits;
+ 
+ARCHITECTURE behavior OF tb_mux4a1_8bits IS 
+
+    COMPONENT mux4a1_8bits
+    PORT(
+         a : IN  std_logic_vector(7 downto 0);
+         b : IN  std_logic_vector(7 downto 0);
+         c : IN  std_logic_vector(7 downto 0);
+         d : IN  std_logic_vector(7 downto 0);
+         sel : IN  std_logic_vector(1 downto 0);
+         z : OUT  std_logic_vector(7 downto 0)
+        );
+    END COMPONENT;
+
+   signal a : std_logic_vector(7 downto 0) := (others => '0');
+   signal b : std_logic_vector(7 downto 0) := (others => '0');
+   signal c : std_logic_vector(7 downto 0) := (others => '0');
+   signal d : std_logic_vector(7 downto 0) := (others => '0');
+   signal sel : std_logic_vector(1 downto 0) := (others => '0');
+
+   signal z : std_logic_vector(7 downto 0);
+ 
+BEGIN
+ 
+    uut: mux4a1_8bits PORT MAP (
+          a => a,
+          b => b,
+          c => c,
+          d => d,
+          sel => sel,
+          z => z
+        );
+
+    a <= "00000000", "00001111" after 5 ns;
+    b <= "11110000", "11111111" after 15 ns;
+	c <= "01010101", "10101010" after 30 ns;
+    d <= "11001100", "00110011" after 45 ns;
+    sel <= "00", "01" after 10 ns, "10" after 20 ns, "11" after 35 ns;
+END;
+
+ --------------------------------
+| Ejemplo 2: Decodificador 3 a 8 |
+ --------------------------------
+
+# P2.1.1
+#########
+
